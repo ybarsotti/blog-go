@@ -7,17 +7,17 @@ import (
 	"github.com/ybarsotti/blog-test/entity"
 )
 
-type repository struct {
+type postRepository struct {
 	db *gorm.DB
 }
 
-func New(db *gorm.DB) irepository.PostRepository {
-	return &repository{
+func NewPostRepository(db *gorm.DB) irepository.PostRepository {
+	return &postRepository{
 		db: db,
 	}
 }
 
-func (r *repository) Create(p *entity.Post) (*entity.Post, error) {
+func (r *postRepository) Create(p *entity.Post) (*entity.Post, error) {
 	dbPost := FromPostEntity(p)
 
 	result := r.db.Create(&dbPost)
@@ -29,7 +29,7 @@ func (r *repository) Create(p *entity.Post) (*entity.Post, error) {
 	return dbPost.ToPostEntity(), nil
 }
 
-func (r *repository) Update(p *entity.Post) (*entity.Post, error) {
+func (r *postRepository) Update(p *entity.Post) (*entity.Post, error) {
 	updateData := &Post{
 		Title:   p.Title,
 		Content: p.Content,
@@ -46,7 +46,7 @@ func (r *repository) Update(p *entity.Post) (*entity.Post, error) {
 	return updatedPost.ToPostEntity(), nil
 }
 
-func (r *repository) GetAll() ([]*entity.Post, error) {
+func (r *postRepository) GetAll() ([]*entity.Post, error) {
 	var posts []Post
 	var entityPosts []*entity.Post
 	r.db.Order("id").Find(&posts)
@@ -58,12 +58,12 @@ func (r *repository) GetAll() ([]*entity.Post, error) {
 	return entityPosts, nil
 }
 
-func (r *repository) GetByID(id int) *entity.Post {
+func (r *postRepository) GetByID(id int) *entity.Post {
 	var post Post
 	r.db.Where("id = ?", id).First(&post)
 	return post.ToPostEntity()
 }
 
-func (r *repository) DeleteById(id int) {
+func (r *postRepository) DeleteById(id int) {
 	r.db.Delete(&Post{}, id)
 }

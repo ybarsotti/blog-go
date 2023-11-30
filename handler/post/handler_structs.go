@@ -1,4 +1,4 @@
-package handler
+package post_handler
 
 type PostPostRequest struct {
 	Title   string `json:"title"`

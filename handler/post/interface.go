@@ -1,4 +1,4 @@
-package handler
+package post_handler
 
 import "github.com/gin-gonic/gin"
 

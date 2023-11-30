@@ -19,7 +19,7 @@ type Comment struct {
 	gorm.Model
 	ID        int `gorm:"primaryKey"`
 	PostID    string
-	Post      Post
+	Post      *Post
 	Author    string
 	Comment   string
 	UpdatedAt time.Time

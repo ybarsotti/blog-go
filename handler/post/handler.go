@@ -1,4 +1,4 @@
-package handler
+package post_handler
 
 import (
 	"net/http"
@@ -10,11 +10,11 @@ import (
 )
 
 type restHandler struct {
-	post_uc post.UseCase
+	postUc post.UseCase
 }
 
-func NewHandler(post_uc post.UseCase) PostRestHandler {
-	return &restHandler{post_uc: post_uc}
+func NewPostHandler(postUc post.UseCase) PostRestHandler {
+	return &restHandler{postUc: postUc}
 }
 
 func (h *restHandler) PostPost(c *gin.Context) {
@@ -24,7 +24,7 @@ func (h *restHandler) PostPost(c *gin.Context) {
 		return
 	}
 
-	post, err := h.post_uc.Create(postData.Title, postData.Content, postData.Author)
+	post, err := h.postUc.Create(postData.Title, postData.Content, postData.Author)
 
 	if err != nil {
 		c.JSON(http.StatusBadRequest, common_handler.ErrorResponse{Message: err.Error()})
@@ -34,7 +34,7 @@ func (h *restHandler) PostPost(c *gin.Context) {
 }
 
 func (h *restHandler) GetPosts(c *gin.Context) {
-	posts, err := h.post_uc.GetAll()
+	posts, err := h.postUc.GetAll()
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, common_handler.ErrorResponse{Message: err.Error()})
@@ -50,7 +50,7 @@ func (h *restHandler) GetPost(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, common_handler.ErrorResponse{Message: "ID must be a valid integer"})
 		return
 	}
-	post := h.post_uc.Get(id)
+	post := h.postUc.Get(id)
 	if post.ID == 0 {
 		c.JSON(http.StatusNotFound, common_handler.ErrorResponse{Message: "Post not found"})
 		return
@@ -72,7 +72,7 @@ func (h *restHandler) UpdatePost(c *gin.Context) {
 		return
 	}
 
-	post, err := h.post_uc.Update(id, postData.Title, postData.Content)
+	post, err := h.postUc.Update(id, postData.Title, postData.Content)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 	}
@@ -88,7 +88,7 @@ func (h *restHandler) DeletePost(c *gin.Context) {
 		return
 	}
 
-	h.post_uc.Delete(id)
+	h.postUc.Delete(id)
 
 	c.Status(http.StatusNoContent)
 }
