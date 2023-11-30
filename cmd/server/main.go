@@ -15,29 +15,34 @@ import (
 func main() {
 	router := gin.Default()
 
-	db, err := db.OpenConn()
+	dbConn, err := db.OpenConn()
 	if err != nil {
 		log.Panicln("Failed to connect database. ", err)
 	}
 
-	post_repo := repository.NewPostRepository(db)
-	comment_repo := repository.NewCommentRepository(db)
+	postRepo := repository.NewPostRepository(dbConn)
+	commentRepo := repository.NewCommentRepository(dbConn)
 
-	post_usecase := post.NewUseCase(post_repo)
-	comment_usecase := comment.NewUseCase(comment_repo, post_repo)
+	postUsecase := post.NewUseCase(postRepo)
+	commentUsecase := comment.NewUseCase(commentRepo, postRepo)
 
-	post_handler := post_handler.NewPostHandler(post_usecase)
-	comment_handler := comment_handler2.NewCommentHandler(comment_usecase)
+	postRestHandler := post_handler.NewPostHandler(postUsecase)
+	commentHandler := comment_handler2.NewCommentHandler(commentUsecase)
 
 	// Post
-	router.POST("/posts", post_handler.PostPost)
-	router.GET("/posts", post_handler.GetPosts)
-	router.GET("/posts/:id", post_handler.GetPost)
-	router.PUT("/posts/:id", post_handler.UpdatePost)
-	router.DELETE("/posts/:id", post_handler.DeletePost)
+	router.POST("/posts", postRestHandler.PostPost)
+	router.GET("/posts", postRestHandler.GetPosts)
+	router.GET("/posts/:id", postRestHandler.GetPost)
+	router.PUT("/posts/:id", postRestHandler.UpdatePost)
+	router.DELETE("/posts/:id", postRestHandler.DeletePost)
 
 	// Comment
-	router.POST("/posts/:id/comments", comment_handler.PostComment)
+	router.POST("/posts/:id/comments", commentHandler.PostComment)
+	router.GET("/posts/:id/comments", commentHandler.GetComment)
+	router.DELETE("/posts/:id/comments/:comment_id", commentHandler.DeleteComment)
 
-	router.Run("localhost:8009")
+	err = router.Run("localhost:8009")
+	if err != nil {
+		log.Fatalln(err.Error())
+	}
 }

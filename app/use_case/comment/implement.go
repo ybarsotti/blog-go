@@ -35,3 +35,24 @@ func (u usecase) Create(postId int, comment string, author string) (*entity.Comm
 
 	return createdComment, nil
 }
+
+func (u usecase) GetAllByPost(postId int) ([]*entity.Comment, error) {
+	post := u.post_repo.GetByID(postId)
+	if post.ID == 0 {
+		return nil, errors.New("post not found")
+	}
+
+	comments := u.comment_repo.GetAllByPost(postId)
+	return comments, nil
+}
+
+func (u usecase) Delete(postId int, commentId int) error {
+	post := u.post_repo.GetByID(postId)
+
+	if post.ID == 0 {
+		return errors.New("post not found")
+	}
+
+	u.comment_repo.DeleteByID(commentId)
+	return nil
+}

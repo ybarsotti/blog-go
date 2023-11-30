@@ -38,3 +38,39 @@ func (h restHandler) PostComment(c *gin.Context) {
 
 	c.JSON(http.StatusCreated, common_handler.SuccessResponse{Data: commentEntity})
 }
+
+func (h restHandler) GetComment(c *gin.Context) {
+	id, err := strconv.Atoi(c.Param("id"))
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, common_handler.ErrorResponse{Message: "ID must be a valid integer"})
+		return
+	}
+
+	comments, err := h.commentUc.GetAllByPost(id)
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, common_handler.ErrorResponse{Message: err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, common_handler.SuccessResponse{Data: comments})
+}
+
+func (h restHandler) DeleteComment(c *gin.Context) {
+	postId, postIdErr := strconv.Atoi(c.Param("id"))
+	id, err := strconv.Atoi(c.Param("comment_id"))
+
+	if postIdErr != nil || err != nil {
+		c.JSON(http.StatusBadRequest, common_handler.ErrorResponse{Message: "ID must be a valid integer"})
+	}
+
+	err = h.commentUc.Delete(postId, id)
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, common_handler.ErrorResponse{Message: err.Error()})
+		return
+	}
+
+	c.Status(http.StatusNoContent)
+}

@@ -27,3 +27,19 @@ func (r repository) Create(c *entity.Comment) (*entity.Comment, error) {
 
 	return dbComment.ToCommentEntity(), nil
 }
+
+func (r repository) GetAllByPost(postId int) []*entity.Comment {
+	var comments []*entity.Comment
+	var dbComments []*Comment
+	r.db.Where("post_id = ?", postId).Find(&dbComments)
+
+	for _, dbComment := range dbComments {
+		comments = append(comments, dbComment.ToCommentEntity())
+	}
+
+	return comments
+}
+
+func (r repository) DeleteByID(id int) {
+	r.db.Delete(&Comment{}, id)
+}
