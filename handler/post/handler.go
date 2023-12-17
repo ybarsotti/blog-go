@@ -1,6 +1,7 @@
 package post_handler
 
 import (
+	"github.com/ybarsotti/blog-test/app/use_case/common"
 	"net/http"
 	"strconv"
 
@@ -19,6 +20,7 @@ func NewPostHandler(postUc post.UseCase) PostRestHandler {
 
 func (h *restHandler) PostPost(c *gin.Context) {
 	var postData PostPostRequest
+
 	if err := c.ShouldBindJSON(&postData); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -27,7 +29,8 @@ func (h *restHandler) PostPost(c *gin.Context) {
 	post, err := h.postUc.Create(postData.Title, postData.Content, postData.Author)
 
 	if err != nil {
-		c.JSON(http.StatusBadRequest, common_handler.ErrorResponse{Message: err.Error()})
+		c.Error(err)
+		return
 	}
 
 	c.JSON(http.StatusCreated, common_handler.SuccessResponse{Data: post})
@@ -37,7 +40,8 @@ func (h *restHandler) GetPosts(c *gin.Context) {
 	posts, err := h.postUc.GetAll()
 
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, common_handler.ErrorResponse{Message: err.Error()})
+		c.Error(err)
+		return
 	}
 
 	c.JSON(http.StatusOK, common_handler.SuccessResponse{Data: posts})
@@ -52,7 +56,7 @@ func (h *restHandler) GetPost(c *gin.Context) {
 	}
 	post := h.postUc.Get(id)
 	if post.ID == 0 {
-		c.JSON(http.StatusNotFound, common_handler.ErrorResponse{Message: "Post not found"})
+		c.Error(&common.NotFoundError{Resource: "Post"})
 		return
 	}
 
@@ -74,7 +78,8 @@ func (h *restHandler) UpdatePost(c *gin.Context) {
 
 	post, err := h.postUc.Update(id, postData.Title, postData.Content)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.Error(err)
+		return
 	}
 
 	c.JSON(http.StatusOK, common_handler.SuccessResponse{Data: post})

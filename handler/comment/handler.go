@@ -32,7 +32,7 @@ func (h restHandler) PostComment(c *gin.Context) {
 	commentEntity, err := h.commentUc.Create(id, postData.Content, postData.Author)
 
 	if err != nil {
-		c.JSON(http.StatusBadRequest, common_handler.ErrorResponse{Message: err.Error()})
+		c.Error(err)
 		return
 	}
 
@@ -50,7 +50,7 @@ func (h restHandler) GetComment(c *gin.Context) {
 	comments, err := h.commentUc.GetAllByPost(id)
 
 	if err != nil {
-		c.JSON(http.StatusBadRequest, common_handler.ErrorResponse{Message: err.Error()})
+		c.Error(err)
 		return
 	}
 
@@ -68,7 +68,7 @@ func (h restHandler) DeleteComment(c *gin.Context) {
 	err = h.commentUc.Delete(postId, id)
 
 	if err != nil {
-		c.JSON(http.StatusBadRequest, common_handler.ErrorResponse{Message: err.Error()})
+		c.Error(err)
 		return
 	}
 
