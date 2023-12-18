@@ -3,15 +3,16 @@ package main
 import (
 	"github.com/ybarsotti/blog-test/app/use_case/comment"
 	"github.com/ybarsotti/blog-test/app/use_case/common"
-	comment_handler2 "github.com/ybarsotti/blog-test/handler/comment"
-	common_handler "github.com/ybarsotti/blog-test/handler/common"
+	"github.com/ybarsotti/blog-test/cmd/server/routes"
+	commenthandler2 "github.com/ybarsotti/blog-test/handler/comment"
+	commonhandler "github.com/ybarsotti/blog-test/handler/common"
 	"gorm.io/gorm"
 	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 	"github.com/ybarsotti/blog-test/app/use_case/post"
-	post_handler "github.com/ybarsotti/blog-test/handler/post"
+	posthandler "github.com/ybarsotti/blog-test/handler/post"
 	"github.com/ybarsotti/blog-test/pkg/db"
 	"github.com/ybarsotti/blog-test/repository"
 )
@@ -25,7 +26,7 @@ func errorHandlerMiddleware() gin.HandlerFunc {
 
 			switch err.(type) {
 			case *common.NotFoundError:
-				c.JSON(http.StatusNotFound, common_handler.ErrorResponse{Message: err.Error()})
+				c.JSON(http.StatusNotFound, commonhandler.ErrorResponse{Message: err.Error()})
 			default:
 				c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
 			}
@@ -43,38 +44,26 @@ func getDBConnection() *gorm.DB {
 	return dbConn
 }
 
-func postFactory() post_handler.PostRestHandler {
+func postFactory() posthandler.PostRestHandler {
 	dbConn := getDBConnection()
 	postRepo := repository.NewPostRepository(dbConn)
 	postUseCase := post.NewUseCase(postRepo)
-	return post_handler.NewPostHandler(postUseCase)
+	return posthandler.NewPostHandler(postUseCase)
 }
 
-func commentFactory() comment_handler2.CommentRestHandler {
+func commentFactory() commenthandler2.CommentRestHandler {
 	dbConn := getDBConnection()
 	postRepo := repository.NewPostRepository(dbConn)
 	commentRepo := repository.NewCommentRepository(dbConn)
 	commentUseCase := comment.NewUseCase(commentRepo, postRepo)
-	return comment_handler2.NewCommentHandler(commentUseCase)
+	return commenthandler2.NewCommentHandler(commentUseCase)
 }
 
 func SetupRouter() *gin.Engine {
 	router := gin.Default()
 	router.Use(errorHandlerMiddleware())
-	postRestHandler := postFactory()
-	commentHandler := commentFactory()
-
-	// Post
-	router.POST("/posts", postRestHandler.PostPost)
-	router.GET("/posts", postRestHandler.GetPosts)
-	router.GET("/posts/:id", postRestHandler.GetPost)
-	router.PUT("/posts/:id", postRestHandler.UpdatePost)
-	router.DELETE("/posts/:id", postRestHandler.DeletePost)
-
-	// Comment
-	router.POST("/posts/:id/comments", commentHandler.PostComment)
-	router.GET("/posts/:id/comments", commentHandler.GetComment)
-	router.DELETE("/posts/:id/comments/:comment_id", commentHandler.DeleteComment)
+	routes.SetupPost(router, postFactory)
+	routes.SetupComment(router, commentFactory)
 	return router
 }
 
