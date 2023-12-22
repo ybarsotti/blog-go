@@ -56,6 +56,6 @@ func (uc *usecase) Update(id int, title string, content string) (*entity.Post, e
 	return p, nil
 }
 
-func (uc *usecase) Delete(id int) {
-	uc.post_repo.DeleteById(id)
+func (uc *usecase) Delete(id int) error {
+	return uc.post_repo.DeleteById(id)
 }

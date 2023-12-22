@@ -93,7 +93,11 @@ func (h *restHandler) DeletePost(c *gin.Context) {
 		return
 	}
 
-	h.postUc.Delete(id)
+	err = h.postUc.Delete(id)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, common_handler.ErrorResponse{Message: err.Error()})
+		return
+	}
 
 	c.Status(http.StatusNoContent)
 }

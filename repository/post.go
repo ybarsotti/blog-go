@@ -64,6 +64,18 @@ func (r *postRepository) GetByID(id int) *entity.Post {
 	return post.ToPostEntity()
 }
 
-func (r *postRepository) DeleteById(id int) {
-	r.db.Delete(&Post{}, id)
+func (r *postRepository) DeleteById(id int) error {
+	tx := r.db.Begin()
+	if err := tx.Unscoped().Where("post_id = ?", id).Delete(&Comment{}).Error; err != nil {
+		tx.Rollback()
+		return nil
+	}
+
+	if err := tx.Unscoped().Delete(&Post{}, id).Error; err != nil {
+		tx.Rollback()
+		return nil
+	}
+
+	tx.Commit()
+	return r.db.Error
 }

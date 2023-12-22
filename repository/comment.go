@@ -41,5 +41,5 @@ func (r repository) GetAllByPost(postId int) []*entity.Comment {
 }
 
 func (r repository) DeleteByID(id int) {
-	r.db.Delete(&Comment{}, id)
+	r.db.Unscoped().Delete(&Comment{}, id)
 }

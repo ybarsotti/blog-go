@@ -7,5 +7,5 @@ type UseCase interface {
 	GetAll() ([]*entity.Post, error)
 	Get(id int) *entity.Post
 	Update(id int, title string, content string) (*entity.Post, error)
-	Delete(id int)
+	Delete(id int) error
 }

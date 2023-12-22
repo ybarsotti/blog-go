@@ -7,5 +7,5 @@ type PostRepository interface {
 	Update(p *entity.Post) (*entity.Post, error)
 	GetAll() ([]*entity.Post, error)
 	GetByID(id int) *entity.Post
-	DeleteById(id int)
+	DeleteById(id int) error
 }

@@ -86,7 +86,7 @@ func TestPostComment(t *testing.T) {
 	}
 }
 
-type GetPostsResponse struct {
+type GetCommentsResponse struct {
 	Data []CommentResponseObject `json:"data"`
 }
 
@@ -105,7 +105,7 @@ func TestGetComment(t *testing.T) {
 	w = httptest.NewRecorder()
 	r.ServeHTTP(w, req)
 
-	var responseBody GetPostsResponse
+	var responseBody GetCommentsResponse
 	err := json.Unmarshal(w.Body.Bytes(), &responseBody)
 	if err != nil {
 		t.Fatal(err)
@@ -142,7 +142,22 @@ func TestDeleteComment(t *testing.T) {
 	w = httptest.NewRecorder()
 	r.ServeHTTP(w, req)
 
+	// Get comments
+	reqGet := httptest.NewRequest("GET", "/posts/1/comments", nil)
+	wGet := httptest.NewRecorder()
+	r.ServeHTTP(wGet, reqGet)
+
+	var responseBody GetCommentsResponse
+	err := json.Unmarshal(wGet.Body.Bytes(), &responseBody)
+	if err != nil {
+		t.Fatal(err)
+	}
+
 	if w.Code != http.StatusNoContent {
 		t.Errorf("Expected %d, but got %d", http.StatusNoContent, w.Code)
+	}
+
+	if len(responseBody.Data) != 0 {
+		t.Errorf("Expected length %d, but got %d", 0, len(responseBody.Data))
 	}
 }
