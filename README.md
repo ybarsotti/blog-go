@@ -1,5 +1,5 @@
 ## Start dev server
 
 ```shell
-go run cmd/server.main.go
+go run cmd/server/main.go
 ```
